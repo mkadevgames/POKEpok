@@ -1,579 +1,101 @@
-<!doctype html>
-<html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>POKEpok</title>
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg0: #05070d;
-      --bg1: #0b1020;
-      --bg2: #12192f;
-      --line: rgba(255,255,255,.12);
-      --text: #f4f7ff;
-      --muted: rgba(244,247,255,.72);
-      --accent: #7de2ff;
-      --accent2: #8b7bff;
-      --shadow: 0 24px 80px rgba(0,0,0,.55);
-      --radius: 28px;
-    }
-
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html, body {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      overflow: hidden;
-      background:
-        radial-gradient(circle at 15% 15%, rgba(125,226,255,.12), transparent 28%),
-        radial-gradient(circle at 85% 20%, rgba(139,123,255,.14), transparent 30%),
-        radial-gradient(circle at 50% 100%, rgba(95,144,255,.12), transparent 34%),
-        linear-gradient(180deg, var(--bg0), var(--bg1) 58%, #05060b);
-      color: var(--text);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background:
-        linear-gradient(120deg, rgba(255,255,255,.05), transparent 18%, transparent 82%, rgba(255,255,255,.04)),
-        radial-gradient(circle at 50% 0%, rgba(255,255,255,.06), transparent 35%);
-      pointer-events: none;
-      mix-blend-mode: screen;
-      opacity: .7;
-    }
-
-    #app {
-      position: relative;
-      width: 100%;
-      height: 100%;
-    }
-
-    #intro {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      z-index: 40;
-      background:
-        radial-gradient(circle at 50% 30%, rgba(125,226,255,.12), transparent 22%),
-        linear-gradient(180deg, rgba(4,7,14,.96), rgba(8,10,22,.95));
-      backdrop-filter: blur(16px);
-      transition: opacity .8s ease, transform .8s ease, visibility .8s ease;
-    }
-
-    #intro.hidden {
-      opacity: 0;
-      visibility: hidden;
-      transform: scale(1.02);
-    }
-
-    .intro-card {
-      width: min(720px, calc(100vw - 32px));
-      padding: 32px 28px;
-      border-radius: 32px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
-      border: 1px solid rgba(255,255,255,.12);
-      box-shadow: var(--shadow);
-      text-align: center;
-    }
-
-    .intro-title {
-      font-size: clamp(28px, 4vw, 56px);
-      line-height: 1;
-      margin: 0 0 16px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      font-weight: 900;
-      background: linear-gradient(90deg, #fff, var(--accent) 45%, var(--accent2));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .intro-text {
-      margin: 0;
-      font-size: clamp(18px, 2vw, 24px);
-      line-height: 1.65;
-      color: var(--text);
-      text-wrap: balance;
-    }
-
-    #launcher {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      z-index: 20;
-      transition: opacity .5s ease, transform .5s ease, visibility .5s ease;
-    }
-
-    #launcher.hidden {
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(12px);
-    }
-
-    .panel {
-      width: min(760px, calc(100vw - 24px));
-      padding: 28px;
-      border-radius: 32px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
-      border: 1px solid rgba(255,255,255,.12);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(18px);
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 22px;
-    }
-
-    .logo {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .logo strong {
-      font-size: 34px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      line-height: 1;
-    }
-
-    .logo span {
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .badge {
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: rgba(125,226,255,.12);
-      border: 1px solid rgba(125,226,255,.26);
-      color: #e9fbff;
-      font-size: 13px;
-      white-space: nowrap;
-    }
-
-    .actions {
-      display: grid;
-      gap: 14px;
-      grid-template-columns: 1fr auto;
-      align-items: stretch;
-    }
-
-    #pickRom, #fullscreenBtn, #retryBtn {
-      border: 0;
-      border-radius: 18px;
-      font-weight: 800;
-      letter-spacing: .02em;
-      cursor: pointer;
-      transition: transform .15s ease, filter .15s ease, opacity .15s ease;
-    }
-
-    #pickRom {
-      min-height: 64px;
-      padding: 0 20px;
-      font-size: 18px;
-      color: #03111c;
-      background: linear-gradient(90deg, #9af5ff, #c2b8ff);
-      box-shadow: 0 16px 40px rgba(125,226,255,.15);
-    }
-
-    #fullscreenBtn, #retryBtn {
-      min-width: 170px;
-      padding: 0 18px;
-      font-size: 16px;
-      color: var(--text);
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.13);
-    }
-
-    #pickRom:hover, #fullscreenBtn:hover, #retryBtn:hover {
-      transform: translateY(-1px);
-      filter: brightness(1.04);
-    }
-
-    #pickRom:active, #fullscreenBtn:active, #retryBtn:active {
-      transform: translateY(0);
-    }
-
-    #status {
-      margin-top: 16px;
-      min-height: 22px;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    #gameShell {
-      position: absolute;
-      inset: 0;
-      z-index: 1;
-      display: grid;
-      grid-template-rows: 1fr;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity .45s ease, visibility .45s ease;
-      background: #000;
-    }
-
-    #gameShell.visible {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    #game {
-      width: 100%;
-      height: 100%;
-    }
-
-    #overlayTop {
-      position: absolute;
-      top: 14px;
-      left: 14px;
-      z-index: 30;
-      display: flex;
-      gap: 10px;
-      pointer-events: none;
-    }
-
-    #overlayTop > * {
-      pointer-events: auto;
-    }
-
-    .floating {
-      backdrop-filter: blur(10px);
-      background: rgba(8,12,22,.45);
-      border: 1px solid rgba(255,255,255,.12);
-      color: var(--text);
-      border-radius: 999px;
-      padding: 10px 14px;
-      font-size: 13px;
-      line-height: 1;
-    }
-
-    #romInput {
-      position: fixed;
-      inset: 0;
-      width: 1px;
-      height: 1px;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    @media (max-width: 720px) {
-      .panel {
-        width: min(760px, calc(100vw - 16px));
-        padding: 20px;
-        border-radius: 24px;
-      }
-
-      .brand {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .actions {
-        grid-template-columns: 1fr;
-      }
-
-      #fullscreenBtn, #retryBtn {
-        width: 100%;
-        min-width: 0;
-      }
-
-      .intro-card {
-        width: calc(100vw - 18px);
-        padding: 24px 18px;
-        border-radius: 24px;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>POKEpok</title>
+<style>
+body{margin:0;background:#000;color:#fff;font-family:Arial,sans-serif;text-align:center;overflow:hidden}
+#start,#emulator{padding:20px}
+#start h1,#emulator h1{font-size:32px;margin:10px;color:#a020f0}
+#start p{font-size:18px}
+input[type=file]{margin:15px 0;display:block;margin-left:auto;margin-right:auto}
+button{background:#a020f0;color:#fff;border:none;padding:15px 30px;font-size:20px;margin:10px;border-radius:8px;cursor:pointer}
+button:active{transform:scale(0.95)}
+#game{width:720px;height:480px;max-width:100%;margin:0 auto;border:8px solid #00f;background:#001133;image-rendering:pixelated}
+</style>
+<script src="https://cdn.emulatorjs.org/stable/emulator.js"></script>
 </head>
 <body>
-  <div id="app">
-    <div id="intro">
-      <div class="intro-card">
-        <h1 class="intro-title">POKEpok</h1>
-        <p class="intro-text">eu fiz esse site para poder aproveitar o maximo do navegador obrigado ;3)</p>
-      </div>
-    </div>
-
-    <div id="launcher">
-      <div class="panel">
-        <div class="brand">
-          <div class="logo">
-            <strong>POKEpok</strong>
-            <span>carregue um arquivo .gba local e entre direto em tela cheia</span>
-          </div>
-          <div class="badge">salvamento local ativado</div>
-        </div>
-
-        <div class="actions">
-          <button id="pickRom" type="button">Carregar ROM</button>
-          <button id="fullscreenBtn" type="button">Tela cheia</button>
-        </div>
-
-        <div id="status"></div>
-      </div>
-    </div>
-
-    <div id="gameShell">
-      <div id="overlayTop">
-        <button id="retryBtn" type="button">Trocar ROM</button>
-      </div>
-      <div id="game"></div>
-    </div>
-
-    <input id="romInput" type="file" accept=".gba,.agb,.bin,.zip,.7z,application/octet-stream">
-  </div>
-
-  <script>
-    const intro = document.getElementById('intro');
-    const launcher = document.getElementById('launcher');
-    const gameShell = document.getElementById('gameShell');
-    const gameRoot = document.getElementById('game');
-    const pickRom = document.getElementById('pickRom');
-    const romInput = document.getElementById('romInput');
-    const fullscreenBtn = document.getElementById('fullscreenBtn');
-    const retryBtn = document.getElementById('retryBtn');
-    const statusEl = document.getElementById('status');
-
-    let loaderInjected = false;
-    let currentRomUrl = '';
-    let currentStateUrl = '';
-    let currentSaveKey = '';
-    let currentRomBlob = null;
-    let currentLoaded = false;
-
-    document.title = 'POKEpok';
-
-    function setStatus(text) {
-      statusEl.textContent = text || '';
-    }
-
-    function base64FromBytes(bytes) {
-      const arr = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
-      let binary = '';
-      const chunk = 0x8000;
-      for (let i = 0; i < arr.length; i += chunk) {
-        binary += String.fromCharCode.apply(null, arr.subarray(i, i + chunk));
-      }
-      return btoa(binary);
-    }
-
-    function bytesFromBase64(base64) {
-      const bin = atob(base64);
-      const out = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-      return out;
-    }
-
-    function safeKey(text) {
-      return text.replace(/[^a-z0-9._-]+/gi, '_').toLowerCase();
-    }
-
-    async function digestKey(file) {
-      const sample = file.slice(0, Math.min(file.size, 1024 * 1024));
-      const blob = await sample.arrayBuffer();
-      const meta = `${file.name}|${file.size}|${file.lastModified || 0}`;
-      const merged = new Uint8Array(blob.byteLength + meta.length);
-      merged.set(new Uint8Array(blob), 0);
-      for (let i = 0; i < meta.length; i++) merged[blob.byteLength + i] = meta.charCodeAt(i) & 255;
-      const hash = await crypto.subtle.digest('SHA-256', merged);
-      return Array.from(new Uint8Array(hash)).map(v => v.toString(16).padStart(2, '0')).join('');
-    }
-
-    function loadStoredState(key) {
-      try {
-        const raw = localStorage.getItem(`${key}:state`);
-        if (!raw) return '';
-        const bytes = bytesFromBase64(raw);
-        return URL.createObjectURL(new Blob([bytes], { type: 'application/octet-stream' }));
-      } catch {
-        return '';
-      }
-    }
-
-    function loadStoredSave(key) {
-      try {
-        const raw = localStorage.getItem(`${key}:save`);
-        if (!raw) return null;
-        return bytesFromBase64(raw);
-      } catch {
-        return null;
-      }
-    }
-
-    function persistBinary(key, suffix, data) {
-      try {
-        const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
-        localStorage.setItem(`${key}:${suffix}`, base64FromBytes(bytes));
-        return true;
-      } catch {
-        return false;
-      }
-    }
-
-    function unloadCurrentUrls() {
-      if (currentRomUrl) {
-        URL.revokeObjectURL(currentRomUrl);
-        currentRomUrl = '';
-      }
-      if (currentStateUrl) {
-        URL.revokeObjectURL(currentStateUrl);
-        currentStateUrl = '';
-      }
-      if (currentRomBlob) {
-        currentRomBlob = null;
-      }
-    }
-
-    async function setupEmulator(file) {
-      currentLoaded = false;
-      setStatus('Preparando o núcleo...');
-      unloadCurrentUrls();
-
-      const baseKey = `POKEpok:${safeKey(file.name)}:${await digestKey(file)}`;
-      currentSaveKey = baseKey;
-
-      currentRomBlob = file;
-      currentRomUrl = URL.createObjectURL(file);
-      const storedStateUrl = loadStoredState(baseKey);
-      currentStateUrl = storedStateUrl || '';
-
-      window.EJS_player = '#game';
-      window.EJS_core = 'mgba';
-      window.EJS_gameUrl = currentRomUrl;
-      window.EJS_gameName = file.name.replace(/\.[^.]+$/, '') || 'POKEpok';
-      window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
-      window.EJS_startOnLoaded = true;
-      window.EJS_fullscreenOnLoaded = true;
-      window.EJS_volume = 1;
-      window.EJS_fixedSaveInterval = 7000;
-      window.EJS_loadStateURL = currentStateUrl;
-      window.EJS_color = '#7de2ff';
-      window.EJS_disableAutoLang = true;
-      window.EJS_ready = function () {
-        setStatus('Emulador pronto.');
-      };
-      window.EJS_onGameStart = function () {
-        currentLoaded = true;
-        setStatus('Rodando.');
-      };
-      window.EJS_onSaveState = function (payload) {
-        try {
-          const state = Array.isArray(payload) ? payload[1] : (payload && payload.state ? payload.state : payload);
-          if (state) {
-            persistBinary(baseKey, 'state', state);
-            setStatus('Estado salvo.');
-            if (currentStateUrl) {
-              URL.revokeObjectURL(currentStateUrl);
-            }
-            currentStateUrl = loadStoredState(baseKey) || '';
-          }
-        } catch {
-          setStatus('Não foi possível salvar o estado.');
-        }
-      };
-      window.EJS_onSaveUpdate = function (payload) {
-        try {
-          const save = payload && payload.save ? payload.save : payload;
-          if (save) {
-            persistBinary(baseKey, 'save', save);
-          }
-        } catch {
-        }
-      };
-      window.EJS_onLoadState = function () {
-        const stored = loadStoredState(baseKey);
-        if (stored) {
-          window.EJS_loadStateURL = stored;
-        }
-      };
-
-      if (!loaderInjected) {
-        loaderInjected = true;
-        const script = document.createElement('script');
-        script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
-        script.async = true;
-        script.onerror = function () {
-          setStatus('Falha ao carregar o núcleo do emulador.');
-        };
-        document.body.appendChild(script);
-      } else {
-        location.reload();
-      }
-
-      launcher.classList.add('hidden');
-      gameShell.classList.add('visible');
-
-      try {
-        if (document.fullscreenElement !== gameShell && gameShell.requestFullscreen) {
-          await gameShell.requestFullscreen();
-        }
-      } catch {
-      }
-    }
-
-    function openPicker() {
-      romInput.value = '';
-      romInput.click();
-    }
-
-    pickRom.addEventListener('click', openPicker);
-    retryBtn.addEventListener('click', openPicker);
-    fullscreenBtn.addEventListener('click', async () => {
-      try {
-        if (!document.fullscreenElement && gameShell.requestFullscreen) {
-          await gameShell.requestFullscreen();
-        } else if (document.exitFullscreen) {
-          await document.exitFullscreen();
-        }
-      } catch {
-      }
-    });
-
-    romInput.addEventListener('change', async () => {
-      const file = romInput.files && romInput.files[0];
-      if (!file) return;
-      pickRom.disabled = true;
-      pickRom.style.opacity = '.7';
-      setStatus('Carregando arquivo...');
-      try {
-        await setupEmulator(file);
-        pickRom.style.display = 'none';
-      } catch {
-        pickRom.disabled = false;
-        pickRom.style.opacity = '1';
-        setStatus('Não foi possível iniciar.');
-      }
-    });
-
-    setTimeout(() => {
-      intro.classList.add('hidden');
-      launcher.classList.remove('hidden');
-    }, 2200);
-
-    window.addEventListener('beforeunload', () => {
-      if (currentStateUrl) URL.revokeObjectURL(currentStateUrl);
-      if (currentRomUrl) URL.revokeObjectURL(currentRomUrl);
-    });
-  </script>
+<div id="start">
+<h1>POKEpok</h1>
+<p>Carregue sua ROM de Pokémon (.gba)</p>
+<input type="file" id="romInput" accept=".gba">
+<button onclick="loadROM()">Carregar ROM e Jogar</button>
+</div>
+<div id="emulator" style="display:none">
+<h1>POKEonline</h1>
+<h2 id="romName" style="color:#ff0;margin-bottom:10px"></h2>
+<div id="game"></div>
+<div style="margin-top:15px">
+<button onclick="exitToMenu()">Voltar ao Menu</button>
+</div>
+</div>
+<script>
+function initDB(){
+return new Promise((resolve,reject)=>{
+const request=indexedDB.open('POKEonlineDB',1)
+request.onupgradeneeded=function(e){
+const db=e.target.result
+if(!db.objectStoreNames.contains('roms')){
+db.createObjectStore('roms',{keyPath:'id'})
+}
+}
+request.onsuccess=function(e){
+resolve(e.target.result)
+}
+request.onerror=function(e){
+reject(e)
+}
+})
+}
+async function saveROM(file){
+const db=await initDB()
+const reader=new FileReader()
+reader.onload=async function(){
+const base64=reader.result.split(',')[1]
+const romData={id:'currentRom',filename:file.name,base64:base64}
+const tx=db.transaction('roms','readwrite')
+tx.objectStore('roms').put(romData)
+tx.oncomplete=function(){
+location.reload()
+}
+}
+reader.readAsDataURL(file)
+}
+async function getSavedROM(){
+const db=await initDB()
+return new Promise((resolve)=>{
+const tx=db.transaction('roms','readonly')
+const request=tx.objectStore('roms').get('currentRom')
+request.onsuccess=function(){
+resolve(request.result)
+}
+})
+}
+async function init(){
+const saved=await getSavedROM()
+if(saved){
+document.getElementById('start').style.display='none'
+document.getElementById('emulator').style.display='block'
+document.getElementById('romName').textContent=saved.filename
+const gameUrl='data:application/octet-stream;base64,'+saved.base64
+window.EJS_player='#game'
+window.EJS_core='gba'
+window.EJS_gameUrl=gameUrl
+window.EJS_gameName=saved.filename
+}
+}
+function loadROM(){
+const file=document.getElementById('romInput').files[0]
+if(!file)return
+saveROM(file)
+}
+function exitToMenu(){
+document.getElementById('emulator').style.display='none'
+document.getElementById('start').style.display='block'
+}
+window.onload=init
+</script>
 </body>
 </html>
